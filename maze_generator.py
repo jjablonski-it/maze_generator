@@ -5,7 +5,8 @@ import math, random, time, sys
 sys.setrecursionlimit(10000)
 
 #Size and resolution of canvas
-cellSize=30
+navHeight=50
+cellSize=20
 height=width=600
 
 #Real size
@@ -14,21 +15,47 @@ rHeight = math.floor(height/cellSize)-2
 
 #Set up window
 window = tkr.Tk()
-window.geometry('{}x{}'.format(width,height))
+window.geometry('{}x{}'.format(width,height+navHeight))
+window.resizable(False, False)
+
+topPanel = tkr.Frame(window)
+topPanel.pack()
+
+#Set up navigation
+topFrame = tkr.Frame(window, bg='#000', height=50)
+topFrame.pack(expand = False, fill=tkr.X)
+
+#Set up buttons
+generateButton = tkr.Button(topFrame, text="Generatre maze", command=lambda : generateMaze(False, 50))
+generateButton.pack(side=tkr.LEFT, pady=navHeight/4, padx=25)
+findpathButton = tkr.Button(topFrame, text="Find path", command=lambda : pathFinding(False, 0))
+findpathButton.pack(side=tkr.RIGHT, pady=navHeight/4, padx=25)
 
 #Set up canvas
-canvas = tkr.Canvas(window,height=height,width=width,bg='#000')
-canvas.pack()
+canvas = tkr.Canvas(window, bg='#000')
+canvas.pack(side=tkr.BOTTOM, expand=True, fill=tkr.BOTH)
 
 class Maze:
     def __init__(self):
         self.grid = []
         self.stack = []
+        self.start = None
+        self.end = None
     
     def fillGrid(self):
         for i in range(rHeight):
             for j in range(rWidth):
                 self.grid.append(Cell(j, i))
+        self.start = self.grid[0]
+        self.end = self.grid[-1]
+
+    #Checking if all cells have been visited already
+    def allVisited(self):
+        for i in self.grid:
+            if(not i.visited):
+                return False
+        return True
+
 
 class Cell:
     def __init__(self, x, y):
@@ -107,23 +134,16 @@ def draw(current):
     for g in maze.grid:
         if not g.visited:
             g.color = 'gray'
-        elif g == current:
+        if g == current:
             g.baseColor = 'red'
         else: 
             g.baseColor = None
             g.color = 'white'
-        if g == maze.grid[0]:
+        if g == maze.start:
             g.baseColor = 'green'
-        elif g == maze.grid[-1]:
+        elif g == maze.end:
             g.baseColor = 'red'
         g.show()
-
-#Checking if all cells have been visited already
-def allVisited(cells):
-    for i in cells:
-        if(not i.visited):
-            return False
-    return True
 
 #Function that removes the walls between the cells depending on the direction
 def removeWalls(cCell, nCell):
@@ -141,11 +161,15 @@ def removeWalls(cCell, nCell):
 
 #Main function for generating maze (Recursive backtracker algorithm)
 def generateMaze(animate, delay_ms):
-    current = maze.grid[0]           #Selecting first cell
+    global maze
+    maze = Maze()
+    maze.fillGrid()
+
+    current = maze.start          #Selecting first cell
     speed = 1/1000 * delay_ms   #Delay between frames in ms
 
     #Maze generating loop
-    while(not allVisited(maze.grid)):
+    while(not maze.allVisited()):
         current.visited = True  #Mark current as visited
             
         #Get active neighbours list for current cell
@@ -166,20 +190,23 @@ def generateMaze(animate, delay_ms):
             draw(current)           #Drawing canvas
             time.sleep(speed)       #Delay for each frame
 
+    canvas.delete('all')    #Clear canvas
+    draw(None)              #Draw maze
+
 #Main function for fidning path (A* algorithm)
 def pathFinding(animate, delay_ms):         
-    current = start             #Starting cell
+    current = maze.start             #Starting cell
     current.checked = True      #Marking as checked
     allOpts = []                #Array of next move options
-    while (current != end):     #Loop while cell isn't the ending cell
+    while (current != maze.end):     #Loop while cell isn't the ending cell
         options = current.options       #Get possible cells from current cell object
         fCostDict = {}                  #Dictionary with fCost as key and cell object as value (my weird sorting idea)
         if options:
             for option in options:         #option - CELL
                 if (not option.checked):            #Check if it is checked 
                     allOpts.append(option)                      #Add new possible cells to check from CELL option
-                    option.gCost = option.distance(start)       #Setting gCost(distance from start)
-                    option.hCost = option.distance(end)         #Setting hCost(distance to end)
+                    option.gCost = option.distance(maze.start)       #Setting gCost(distance from start)
+                    option.hCost = option.distance(maze.end)         #Setting hCost(distance to end)
                     option.fCost = option.gCost + option.hCost  #Setting fCost(sum of gCost and hCost)
                     option.checked = True           #Mark as checked
                 option.parent = current             #Set cell's parent
@@ -213,22 +240,6 @@ def recursionDrawing(node):
 #'Main'
 maze = Maze()
 maze.fillGrid()
-
-#Generating maze function
-generateMaze(False, 0)
-
-#Remove red current cell indicator
-canvas.delete('all') 
-draw(None)
-
-#Draw Start & End points
-start, end = maze.grid[0], maze.grid[-1]
-start.color, end.color = 'green', 'red'
-start.show()
-end.show()
-
-#Path finding function
-pathFinding(True, 0)
 
 #Update canvas
 canvas.update()
