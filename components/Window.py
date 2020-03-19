@@ -1,5 +1,11 @@
 import tkinter as tkr
-from settings import width, height, navHeight, mazeRes
+from components import Settings
+
+#Variables
+width = Settings.width
+height = Settings.height
+navHeight = Settings.navHeight
+mazeRes = Settings.mazeRes
 
 #Canvas global variable
 canvas = None

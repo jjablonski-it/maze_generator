@@ -1,5 +1,8 @@
 import math
-from window import canvas
+from components import Window
+
+#Global variables
+canvas = Window.canvas
 
 class Cell:
     def __init__(self, x, y, maze):

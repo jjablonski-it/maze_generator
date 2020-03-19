@@ -1,25 +1,25 @@
 import tkinter as tkr
 import math, random, sys
-from settings import mazeRes
+from components import Settings
 
 #Increse limit of recursion
 sys.setrecursionlimit(10000)
 
 #Import window file
-import window
-window.setupWindow()
-window.setupCanvas()
+from components import Window
+Window.setupWindow()
+Window.setupCanvas()
 
 #Import maze file
-from maze import Maze
+from components import Maze
 
 #Create maze object
-maze = Maze(mazeRes)
+maze = Maze.Maze(Settings.mazeRes)
 
 #Set buttons
-window.setupInputs(maze)
+Window.setupInputs(maze)
 
 #Generate starting maze
-maze.generateMaze(False, mazeRes)
+maze.generateMaze(False, Settings.mazeRes)
 
-window.root.mainloop()
+Window.root.mainloop()

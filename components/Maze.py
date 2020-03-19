@@ -1,7 +1,11 @@
 import math, random, sys
-from settings import width, height
-import window
-from cell import Cell
+from components import Settings
+from components import Window
+from components import Cell
+
+#Global variables
+height = Settings.height
+width = Settings.width
 
 class Maze:
     def __init__(self, mazeRes):
@@ -36,7 +40,7 @@ class Maze:
     def fillGrid(self):
         for i in range(self.rHeight):
             for j in range(self.rWidth):
-                self.grid.append(Cell(j, i, self))
+                self.grid.append(Cell.Cell(j, i, self))
         self.start = self.grid[0]
         self.end = self.grid[-1]
     
@@ -69,13 +73,13 @@ class Maze:
                 next = self.stack.pop()
             
             current = next          #Changing current cell
-            window.canvas.update()         #Updating canvas
+            Window.canvas.update()         #Updating canvas
             
             if animate:                 #Only if animating
-                window.canvas.delete('all')    #Clear canvas
+                Window.canvas.delete('all')    #Clear canvas
                 self.draw(current)           #Drawing canvas
 
-        window.canvas.delete('all')    #Clear canvas
+        Window.canvas.delete('all')    #Clear canvas
         self.draw(None)              #Draw maze
 
     #Main function for fidning path (A* algorithm)
@@ -104,16 +108,16 @@ class Maze:
 
             #Drawing part
             if(animate):
-                window.canvas.delete('all')            #Clear canvas
+                Window.canvas.delete('all')            #Clear canvas
                 self.recursionDrawing(current)       #Draw line from current to start
                 self.draw(None)                      #Redraw canvas
-                window.canvas.update()                 #Update changes
+                Window.canvas.update()                 #Update changes
         
         #Display at the end
-        window.canvas.delete('all')            #Clear canvas
+        Window.canvas.delete('all')            #Clear canvas
         self.recursionDrawing(current)       #Draw line from current to start
         self.draw(None)                      #Redraw canvas
-        window.canvas.update()
+        Window.canvas.update()
 
     #Reset checked
     def resetChecked(self):
